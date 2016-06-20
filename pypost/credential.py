@@ -1,10 +1,19 @@
 from log import LOG, Logs
+from getpass import getpass
 
 
 class credential(object):
     def __init__(self, username, password):
         self.uname = username
         self.passwd = password
+
+    def set_credentials_from_stdin(self):
+        uname = raw_input('Username: ')
+        passwd = getpass()
+
+        self.uname = uname
+        self.passwd = passwd
+
 
     def set_credentials_from_file(self, filename):
         try:
@@ -25,7 +34,7 @@ class credential(object):
     def get_username(self):
         return self.uname
 
-    def get_passowrd(self):
+    def get_password(self):
         return self.passwd
 
     def set_username(self, username):

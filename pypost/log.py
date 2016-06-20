@@ -24,7 +24,7 @@ def LOG(**kwargs):
     if not kwargs.has_key('log'):
         kwargs['log'] = Logs.INFO
 
-    log = '%s From %50s %5s: %s' % (
+    log = '%s From %20s %5s: %s' % (
         strftime('[%d-%m-%Y - %H:%M:%S]', localtime()),
         caller_class + '.' + caller_func,
         kwargs['log'],
