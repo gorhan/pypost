@@ -26,7 +26,7 @@ def get_parameters_manually(server):
             break
 
     subject = raw_input('SUBJECT: ')
-    msg = raw_input('MESSAGE:\n')
+    msg = raw_input('MESSAGE:\n') + '\n'
     new_line_counter = 0
     while True:
         row = raw_input()
@@ -35,7 +35,7 @@ def get_parameters_manually(server):
             if new_line_counter >= 2:
                 break
         else:
-            msg += row
+            msg += row + '\n'
             new_line_counter = 0
 
     server.set_message(subject, msg)
