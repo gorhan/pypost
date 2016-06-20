@@ -14,7 +14,6 @@ class credential(object):
         self.uname = uname
         self.passwd = passwd
 
-
     def set_credentials_from_file(self, filename):
         try:
             fp = open(filename, 'r')

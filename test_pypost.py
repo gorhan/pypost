@@ -14,7 +14,8 @@ def get_parameters_manually(server):
     else:
         server.set_credentials_from_stdin()
 
-    server.connect()
+    if not server.connect():
+        return False
 
     from_addr = raw_input('FROM: ')
     if not server.set_from(from_addr):
@@ -34,6 +35,8 @@ def get_parameters_manually(server):
             new_line_counter += 1
             if new_line_counter >= 2:
                 break
+            else:
+                msg += row + '\n'
         else:
             msg += row + '\n'
             new_line_counter = 0

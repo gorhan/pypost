@@ -28,7 +28,10 @@ class mail_server(credential):
     def get_server_address(self):
         return self.server_addr
 
-    def set_from(self, mail_address, alias=None):
+    def set_from(self, mail_address_alias):
+        mail_address = mail_address_alias.split(',')
+        alias = mail_address[0].strip()
+        mail_address = mail_address[-1].strip()
         if re.match(MAIL_PATTERN, mail_address):
             if alias is None:
                 alias = mail_address
@@ -40,7 +43,10 @@ class mail_server(credential):
         LOG(msg='Invalid mail address: %s' % mail_address, log=Logs.ERROR)
         return False
 
-    def add_to(self, mail_address, alias=None):
+    def add_to(self, mail_address_alias):
+        mail_address = mail_address_alias.split(',')
+        alias = mail_address[0].strip()
+        mail_address = mail_address[-1].strip()
         if re.match(MAIL_PATTERN, mail_address):
             if alias is None:
                 alias = mail_address
@@ -84,11 +90,11 @@ class mail_server(credential):
 
         mail = MIMEMultipart()
         mail['SUBJECT'] = self.subject
-        mail['FROM'] = self.sender_addr[1]
-        mail['TO'] = ','.join(mail_addr for _, mail_addr in self.receiver_addrs)
+        mail['FROM'] = '%s <%s>' % (self.sender_addr[0], self.sender_addr[1])
+        mail['TO'] = ','.join('%s <%s>' % (alias, mail_addr) for alias, mail_addr in self.receiver_addrs)
 
         text = MIMEText(self.message, 'plain')
-        html = MIMEText('<p><b>The message contains %d characters!</b></p>' % len(self.message), 'html')
+        html = MIMEText('<p><b>-- The message contains %d characters! --</b></p>' % len(self.message), 'html')
 
         mail.attach(text)
         mail.attach(html)
@@ -100,6 +106,7 @@ class mail_server(credential):
 
         if mail:
             self.smtp_server.sendmail(self.sender_addr[1], [receiver_addr for _, receiver_addr in self.receiver_addrs], mail.as_string())
+            LOG(msg='Your mail has been sent successfully...', log=Logs.INFO)
             return True
 
         LOG(msg='Unexpected error occurred.', log=Logs.ERROR)
