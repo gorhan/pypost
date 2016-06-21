@@ -17,14 +17,19 @@ class Logs:
 
 def LOG(**kwargs):
     stck = stack()[1][0]
-    # print stck.f_locals
-    caller_class = stck.f_locals['cls'].__name__ if 'cls' in stck.f_locals else stck.f_locals['self'].__class__.__name__
+    print
+    if 'cls' in stck.f_locals:
+        caller_class = stck.f_locals['cls'].__name__
+    elif 'self' in stck.f_locals:
+        caller_class = stck.f_locals['self'].__class__.__name__
+    else:
+        caller_class = 'GLOBAL'
     caller_func = stck.f_code.co_name
 
     if not kwargs.has_key('log'):
         kwargs['log'] = Logs.INFO
 
-    log = '%s From %20s %5s: %s' % (
+    log = '%s From %40s %5s: %s' % (
         strftime('[%d-%m-%Y - %H:%M:%S]', localtime()),
         caller_class + '.' + caller_func,
         kwargs['log'],
