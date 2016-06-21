@@ -45,6 +45,22 @@ def get_parameters_manually(server):
                 new_line_counter = 0
 
         server.set_message(subject, msg)
+
+        inp = raw_input('Do you want to add image? [Y/n]: ')
+        while True:
+            if inp == '' or inp.capitalize() == 'Y':
+                file_path = raw_input('Enter an image file: ')
+
+                while True:
+                    if server.add_image_file(file_path):
+                        break
+                    file_path = raw_input('Enter a valid image file: ')
+            else:
+                break
+
+            inp = raw_input('Do you want to add another image? [y/N]: ')
+            inp = 'N' if inp == '' or inp.capitalize() == 'N' else inp.capitalize()
+
         return True
     except KeyboardInterrupt:
         LOG(msg='SIGINT signal is caught...', log=Logs.WARN)

@@ -1,9 +1,11 @@
 import smtplib
 import re
 from log import LOG, Logs
+from os.path import isfile, basename
 from credential import credential
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 GMAIL_SMTP_SERVER_ADDR = 'smtp.gmail.com:587'
 MAIL_PATTERN = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
@@ -21,6 +23,7 @@ class mail_server(credential):
 
         self.subject = None
         self.message = None
+        self.image_files = list()
 
     def set_server_address(self, server_address):
         self.server_addr = server_address
@@ -62,6 +65,26 @@ class mail_server(credential):
         LOG(msg='Invalid mail address: %s' % mail_address, log=Logs.ERROR)
         return False
 
+    def in_receiver_list(self, mail_addr):
+        for index, receiver in self.receiver_addrs:
+            if mail_addr in receiver:
+                return index
+        return -1
+
+    def remove_receiver(self, mail_addr):
+        index = self.in_receiver_list(mail_addr)
+        if index != -1:
+            removed_receiver = self.receiver_addrs.pop(index)
+            LOG(msg='%s <%s> is removed from the recipients list' % (removed_receiver[0], removed_receiver[1]), log=Logs.INFO)
+            return True
+
+        LOG(msg='%s is not in the recipients list' % mail_addr, log=Logs.INFO)
+        return False
+
+    def clear_receivers(self):
+        self.receiver_addrs = list()
+        LOG(msg='All recipients are removed...', log=Logs.INFO)
+
     def get_sender(self):
         return self.sender_addr
 
@@ -71,6 +94,18 @@ class mail_server(credential):
     def set_message(self, subject, text):
         self.subject = subject
         self.message = text
+
+    def add_image_file(self, file_name):
+        if not isfile(file_name):
+            LOG(msg='The file does not exist: Filename: %s' % file_name, log=Logs.INFO)
+            return False
+        elif file_name in self.image_files:
+            LOG(msg='The file is already in the list', log=Logs.INFO)
+            return False
+
+        self.image_files.append(file_name)
+        LOG(msg='The image file is added', log=Logs.INFO)
+        return True
 
     def connect(self):
         try:
@@ -97,6 +132,13 @@ class mail_server(credential):
         html = MIMEText('<p><b>-- The message contains %d characters! --</b></p>' % len(self.message), 'html')
 
         mail.attach(text)
+
+        for image_file in self.image_files:
+            fp = open(image_file, 'rb')
+            image = fp.read()
+            attachment = MIMEImage(image, name=basename(image_file))
+            mail.attach(attachment)
+
         mail.attach(html)
 
         return mail
